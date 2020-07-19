@@ -44,7 +44,7 @@ def _httpHandlerMemory(httpClient, httpResponse, routeArgs):
 
 
 
-def _httpHandlerGetCalibration(httpClient, httpResponse, routeArgs):
+def _httpHandlerGetStatus(httpClient, httpResponse, routeArgs):
     global focus, aperture
 
     mtype = routeArgs['mtype']
@@ -52,14 +52,17 @@ def _httpHandlerGetCalibration(httpClient, httpResponse, routeArgs):
     if 'focus' in mtype:
         max_steps = focus.max_steps
         calibrated = focus.calibrated
+        actual_position = focus.actual_position
     elif 'aperture' in mtype:
         max_steps = aperture.max_steps
         calibrated = aperture.calibrated
+        actual_position = aperture.actual_position
 
     data = {
         'mtype': mtype,
         'max_steps': max_steps,
-        'calibrated': calibrated
+        'calibrated': calibrated,
+        'position': actual_position
     }
 
     httpResponse.WriteResponseOk(headers=None,
@@ -118,6 +121,7 @@ def _httpHandlerSetData(httpClient, httpResponse, routeArgs):
 routeHandlers = [
     ("/move/<mtype>/<steps>/<clockwise>", "GET", _httpHandlerSetData),
     ("/calibration/<mtype>", "GET", _httpHandlerSetCalibration),
+    ("/status/<mtype>", "GET", _httpHandlerGetStatus),
     ("/memory/<query>", "GET", _httpHandlerMemory)
 ]
 
