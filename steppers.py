@@ -80,6 +80,7 @@ class Axis:
     def __init__(self, axis, ina, max_current):
         self.axes = axis
         self.ina = ina
+        self.margin = 80
         self.max_steps = 0
         self.max_current = max_current
         self.actual_position = 0
@@ -111,7 +112,10 @@ class Axis:
                 self.max_steps = self.axes.get_step()
                 self.axes.set_off()
         
-        self.actual_position = self.max_steps
+        self.axes.set_motion(self.margin)
+
+        self.actual_position = self.max_steps - self.margin
+
 
         self.calibrated = True
         
@@ -123,9 +127,9 @@ class Axis:
 
         position = self.actual_position + steps
 
-        if position > self.max_steps:
+        if position > self.max_steps - self.margin:
             return False
-        if position < 0:
+        if position < self.margin:
             return False
         else:
             self.axes.set_motion(-steps)

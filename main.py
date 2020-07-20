@@ -14,8 +14,8 @@ ina = INA219(config.device['shunt_ohms'], i2c, log_level=ERROR)
 ina.configure()
 
 # steppers initialization
-m0 = Stepper(0, Pin(config.device['m1_dir']), Pin(config.device['m1_step']), Pin(config.device['m1_enable']), 500)
-m1 = Stepper(1, Pin(config.device['m2_dir']), Pin(config.device['m2_step']), Pin(config.device['m2_enable']), 500)
+m0 = Stepper(0, Pin(config.device['m1_dir']), Pin(config.device['m1_step']), Pin(config.device['m1_enable']), 400)
+m1 = Stepper(1, Pin(config.device['m2_dir']), Pin(config.device['m2_step']), Pin(config.device['m2_enable']), 400)
 
 # axis initialization
 aperture = Axis(m0, ina, config.device['max_ma'])
