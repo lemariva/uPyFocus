@@ -29,10 +29,14 @@ class Stepper:
 
         self.tim.init(period=1, mode=Timer.PERIODIC, callback=self.do_step)
 
+        self.done = False
+
     def do_step(self, t):   # called by timer interrupt every (freq/1000)ms
         if self.count == 0:
+            self.done = False
             self.pwm.duty(512)
         elif self.count >= self.steps:
+            self.done = True
             self.pwm.duty(0)
 
         if self.count != -1:
@@ -62,6 +66,7 @@ class Stepper:
         self.count = -1
         self.steps = 0
         self.pwm.duty(0)
+        self.done = True
         self.enable_pin.off()
 
     def get_step(self):
@@ -80,7 +85,7 @@ class Axis:
     def __init__(self, axis, ina, max_current):
         self.axes = axis
         self.ina = ina
-        self.margin = 80
+        self.margin = 100
         self.max_steps = 0
         self.max_current = max_current
         self.actual_position = 0
@@ -132,9 +137,11 @@ class Axis:
         if position < self.margin:
             return False
         else:
-            self.axes.set_motion(-steps)
-            self.actual_position = position
-            return True
+            if self.axes.done:
+                self.axes.set_motion(-steps)
+                self.actual_position = position
+                return True
+            return False
 
     def move_max(self):
         position = self.max_steps - self.actual_position

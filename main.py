@@ -18,8 +18,8 @@ m0 = Stepper(0, Pin(config.device['m1_dir']), Pin(config.device['m1_step']), Pin
 m1 = Stepper(1, Pin(config.device['m2_dir']), Pin(config.device['m2_step']), Pin(config.device['m2_enable']), 400)
 
 # axis initialization
-aperture = Axis(m0, ina, config.device['max_ma'])
-focus = Axis(m1, ina, config.device['max_ma'])
+aperture = Axis(m0, ina, config.device['max_ma_aperture'])
+focus = Axis(m1, ina, config.device['max_ma_focus'])
 
 # axis calibration
 focus.calibration()
@@ -93,7 +93,7 @@ def _httpHandlerSetCalibration(httpClient, httpResponse, routeArgs):
                                     content=json.dumps(data))
     gc.collect()
 
-def _httpHandlerSetData(httpClient, httpResponse, routeArgs):
+def _httpHandlerSetMove(httpClient, httpResponse, routeArgs):
     global focus, aperture
     mtype = routeArgs['mtype']
     steps = int(routeArgs['steps'])
@@ -119,7 +119,7 @@ def _httpHandlerSetData(httpClient, httpResponse, routeArgs):
     gc.collect()
 
 routeHandlers = [
-    ("/move/<mtype>/<steps>/<clockwise>", "GET", _httpHandlerSetData),
+    ("/move/<mtype>/<steps>/<clockwise>", "GET", _httpHandlerSetMove),
     ("/calibration/<mtype>", "GET", _httpHandlerSetCalibration),
     ("/status/<mtype>", "GET", _httpHandlerGetStatus),
     ("/memory/<query>", "GET", _httpHandlerMemory)
