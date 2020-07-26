@@ -20,14 +20,15 @@ device = {
     'ina_scl': 26,
     'ina_sda': 32,
     'shunt_ohms': 0.1,
-    'max_ma': 250,
-    'm1_enable': 5,
+    'max_ma_focus': 40,
+    'max_ma_aperture': 40,
+    'm1_enable': 25,
     'm1_step': 23,
     'm1_dir': 33,
-    'm2_enable': 5,
+    'm2_enable': 21,
     'm2_step': 22,
-    'm2_dir': 19
-
+    'm2_dir': 19,
+    'margin': 50
 }
 
 wifi = {
