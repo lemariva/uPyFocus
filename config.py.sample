@@ -28,8 +28,10 @@ device = {
     'm2_enable': 21,
     'm2_step': 22,
     'm2_dir': 19,
-    'margin': 50
+    'margin': 50,
+    'pwm_freq': 500
 }
+
 
 wifi = {
     'ssid':'',

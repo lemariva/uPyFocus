@@ -17,12 +17,21 @@ ina = INA219(config.device['shunt_ohms'], i2c, log_level=ERROR)
 ina.configure()
 
 # steppers initialization
-m0 = Stepper(0, Pin(config.device['m1_dir']), Pin(config.device['m1_step']), Pin(config.device['m1_enable']), 500)
-m1 = Stepper(1, Pin(config.device['m2_dir']), Pin(config.device['m2_step']), Pin(config.device['m2_enable']), 500)
+m0 = Stepper(0, Pin(config.device['m1_dir']), 
+            Pin(config.device['m1_step']), 
+            Pin(config.device['m1_enable']), 
+            config.device['pwm_freq'])
+
+m1 = Stepper(1, Pin(config.device['m2_dir']), 
+            Pin(config.device['m2_step']), 
+            Pin(config.device['m2_enable']),
+            config.device['pwm_freq'])
 
 # axis initialization
-aperture = Axis(m0, ina, config.device['max_ma_aperture'], config.device['margin'])
-focus = Axis(m1, ina, config.device['max_ma_focus'], config.device['margin'])
+aperture = Axis(m0, ina, 
+            config.device['max_ma_aperture'], config.device['margin'])
+focus = Axis(m1, ina, 
+            config.device['max_ma_focus'], config.device['margin'])
 
 # axis calibration
 current = ina.current()
@@ -45,7 +54,6 @@ def _httpHandlerMemory(httpClient, httpResponse, routeArgs):
                                 contentType="text/html",
                                 contentCharset="UTF-8",
                                 content=content)
-
 
 
 def _httpHandlerGetStatus(httpClient, httpResponse, routeArgs):
@@ -83,12 +91,18 @@ def _httpHandlerSetCalibration(httpClient, httpResponse, routeArgs):
 
     if 'focus' in mtype:
         max_steps = focus.calibration()
+        position = focus.actual_position
+        calibrated = focus.calibrated
     elif 'aperture' in mtype:
         max_steps = aperture.calibration()
+        position = aperture.actual_position
+        calibrated = aperture.calibrated
 
     data = {
         'mtype': mtype,
-        'max_steps': max_steps
+        'max_steps': max_steps,
+        'calibrated': calibrated,
+        'position': position
     }
 
     httpResponse.WriteResponseOk(headers=None,
@@ -129,12 +143,11 @@ def _httpHandlerSetMove(httpClient, httpResponse, routeArgs):
     gc.collect()
 
 routeHandlers = [
-    ("/move/<mtype>/<steps>/<clockwise>", "GET", _httpHandlerSetMove),
-    ("/calibration/<mtype>", "GET", _httpHandlerSetCalibration),
+    ("/memory/<query>", "GET", _httpHandlerMemory),
     ("/status/<mtype>", "GET", _httpHandlerGetStatus),
-    ("/memory/<query>", "GET", _httpHandlerMemory)
+    ("/calibration/<mtype>", "GET", _httpHandlerSetCalibration),
+    ("/move/<mtype>/<steps>/<clockwise>", "GET", _httpHandlerSetMove)
 ]
-
 
 mws = MicroWebSrv(routeHandlers=routeHandlers, webPath="www/")
 mws.Start(threaded=True)
