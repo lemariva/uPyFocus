@@ -17,12 +17,12 @@ ina = INA219(config.device['shunt_ohms'], i2c, log_level=ERROR)
 ina.configure()
 
 # steppers initialization
-m0 = Stepper(0, Pin(config.device['m1_dir']), 
+m1 = Stepper(0, Pin(config.device['m1_dir']), 
             Pin(config.device['m1_step']), 
             Pin(config.device['m1_enable']), 
             config.device['pwm_freq'])
 
-m1 = Stepper(1, Pin(config.device['m2_dir']), 
+m0 = Stepper(1, Pin(config.device['m2_dir']), 
             Pin(config.device['m2_step']), 
             Pin(config.device['m2_enable']),
             config.device['pwm_freq'])

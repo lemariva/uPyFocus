@@ -3,9 +3,12 @@ import config
 import network
 import utime
 import ntptime
+import machine
 
 ## ftp access
 #from ftp import ftpserver
+
+machine.freq(240000000)
 
 def do_connect():
     sta_if = network.WLAN(network.STA_IF)
