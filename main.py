@@ -2,10 +2,12 @@ import config
 import gc
 import json
 import utime
+import neopixel
 from machine import Pin, I2C
 from ina219 import INA219
 from steppers import Stepper, Axis
 from logging import ERROR
+from letters import characters
 from microWebSrv import MicroWebSrv
 
 # lock 
@@ -15,6 +17,9 @@ lock1 = False
 i2c = I2C(-1, Pin(config.device['ina_scl']), Pin(config.device['ina_sda']))
 ina = INA219(config.device['shunt_ohms'], i2c, log_level=ERROR)
 ina.configure()
+
+# leds
+np = neopixel.NeoPixel(machine.Pin(27), 25)
 
 # steppers initialization
 m1 = Stepper(0, Pin(config.device['m1_dir']), 
@@ -33,11 +38,29 @@ aperture = Axis(m0, ina,
 focus = Axis(m1, ina, 
             config.device['max_ma_focus'], config.device['margin'])
 
+
+def write_2leds(letter, color):
+    rgb = color
+    char_matrix = characters.get(letter)
+    led_counter = 0
+    for row in char_matrix:
+        for led in row:
+            if(led):
+                np[led_counter] = rgb
+            else:
+                np[led_counter] = (0, 0, 0)
+            led_counter += 1
+    np.write()
+
 # axis calibration
+write_2leds(".", (3, 0, 0))
 current = ina.current()
+write_2leds(".", (0, 0, 5))
 aperture.calibration()
 utime.sleep_ms(1000)
+write_2leds(".", (0, 3, 0))
 focus.calibration()
+write_2leds(" ", (0, 0, 0))
 
 # webserver functions
 def _httpHandlerMemory(httpClient, httpResponse, routeArgs):
@@ -121,11 +144,14 @@ def _httpHandlerSetMove(httpClient, httpResponse, routeArgs):
     position = 0
 
     if 'focus' in mtype:
+        write_2leds(".", (0, 3, 0))
         status = focus.move(clockwise * steps, 1)
         position = focus.actual_position
     elif 'aperture' in mtype:
+        write_2leds(".", (0, 0, 5))
         status = aperture.move(clockwise * steps, 1)
         position = aperture.actual_position
+    write_2leds(" ", (0, 0, 0))
 
     data = {
         'mtype': mtype,
